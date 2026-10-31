@@ -25,11 +25,24 @@ jobs:
           tar -xJf source.tar.xz
           test -f GematriaLabAndroid/app/src/main/assets/index.html
 
-      - name: Apply UI and date calculator updates
+      - name: Apply GematriaLab 1.2 design and calculator patch
         run: |
-          base64 --decode .github/scripts/patch_app.py.gz.b64 | gzip -dc > /tmp/patch_app.py
-          python /tmp/patch_app.py GematriaLabAndroid
-          test -f GematriaLabAndroid/app/src/main/assets/index.html
+          cat gematria-patch-v1.2-*.b64 > /tmp/gematria-patch.b64
+          test "$(wc -c < /tmp/gematria-patch.b64)" -eq 15324
+          base64 --decode /tmp/gematria-patch.b64 > /tmp/gematria-patch.xz
+          echo "9d884efe6287cbe616a7643178ebec79b6bfc42fc81998e53037072c20e30970  /tmp/gematria-patch.xz" | sha256sum -c -
+          xz -dc /tmp/gematria-patch.xz | patch -p1
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("GematriaLabAndroid/app/src/main/assets/index.html")
+          s = p.read_text()
+          js = s.split("<script>", 1)[1].split("</script>", 1)[0]
+          Path("/tmp/gematrialab-inline.js").write_text(js)
+          assert 'value="Love"' not in s
+          assert 'placeholder=""' in s
+          assert "MULTI-DATE CALCULATOR" in s
+          PY
+          node --check /tmp/gematrialab-inline.js
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
