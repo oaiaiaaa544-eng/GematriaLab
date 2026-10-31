@@ -89,7 +89,26 @@ js = r'''
  ids.forEach(id=>$(id).addEventListener("change",()=>{calc();offset();}));
  ["classic-table","duration-variations","date1-offset"].forEach(id=>$(id).addEventListener("change",()=>{calc();}));
  $("date1-offset").addEventListener("change",()=>{$("g-offset-output").classList.toggle("hidden",!$("date1-offset").checked)});
- parts(today,"g-date1");parts(today,"g-date2");calc();
+ const prefKey="gematrialab_gem_date_prefs";
+ try{
+  const saved=JSON.parse(localStorage.getItem(prefKey)||"{}");
+  ids.slice(0,6).forEach(id=>{if(saved[id]!==undefined)$(id).value=saved[id];});
+  ["g-years","g-months","g-weeks","g-days"].forEach(id=>{if(saved[id]!==undefined)$(id).value=saved[id];});
+  ["classic-table","duration-variations","date1-offset"].forEach(id=>{if(saved[id]!==undefined)$(id).checked=saved[id];});
+  if(saved.operation)document.querySelector('input[name="g-date-op"][value="'+saved.operation+'"]').checked=true;
+ }catch(e){}
+ if(!$("g-date1-year").value)parts(today,"g-date1");
+ if(!$("g-date2-year").value)parts(today,"g-date2");
+ function savePrefs(){
+  const saved={};ids.forEach(id=>saved[id]=$(id).value);
+  ["classic-table","duration-variations","date1-offset"].forEach(id=>saved[id]=$(id).checked);
+  saved.operation=document.querySelector('input[name="g-date-op"]:checked').value;
+  localStorage.setItem(prefKey,JSON.stringify(saved));
+ }
+ ids.forEach(id=>$(id).addEventListener("change",savePrefs));
+ ["classic-table","duration-variations","date1-offset"].forEach(id=>$(id).addEventListener("change",savePrefs));
+ document.querySelectorAll('input[name="g-date-op"]').forEach(el=>el.addEventListener("change",savePrefs));
+ calc();
 })();
 '''
 s=s.replace("</script>",js+"\n</script>",1)
