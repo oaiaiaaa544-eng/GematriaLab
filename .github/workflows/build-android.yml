@@ -44,6 +44,35 @@ jobs:
           PY
           node --check /tmp/gematrialab-inline.js
 
+      - name: Final palette and multi-date defaults
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("GematriaLabAndroid/app/src/main/assets/index.html")
+          s = p.read_text()
+          target = "initializeMultiDates(today);"
+          assert target in s
+          s = s.replace(target, target + "multiDates.push({id:nextMultiDateId++,value:today});renderMultiDateInputs();renderMultiDates();", 1)
+          palette = """
+          /* Classic Gematrinator-style cipher color rotation */
+          .cipher-display-item:nth-child(10n+1){border-left-color:#43cc73}.cipher-display-item:nth-child(10n+1) .value{color:#54dd7e}
+          .cipher-display-item:nth-child(10n+2){border-left-color:#648cff}.cipher-display-item:nth-child(10n+2) .value{color:#83a5ff}
+          .cipher-display-item:nth-child(10n+3){border-left-color:#d77acb}.cipher-display-item:nth-child(10n+3) .value{color:#e69adb}
+          .cipher-display-item:nth-child(10n+4){border-left-color:#e4c13b}.cipher-display-item:nth-child(10n+4) .value{color:#f2d55f}
+          .cipher-display-item:nth-child(10n+5){border-left-color:#36c2d5}.cipher-display-item:nth-child(10n+5) .value{color:#62d5e2}
+          .cipher-display-item:nth-child(10n+6){border-left-color:#e38d4f}.cipher-display-item:nth-child(10n+6) .value{color:#f2a66c}
+          .cipher-display-item:nth-child(10n+7){border-left-color:#a587e8}.cipher-display-item:nth-child(10n+7) .value{color:#c1a8ff}
+          .cipher-display-item:nth-child(10n+8){border-left-color:#d96d75}.cipher-display-item:nth-child(10n+8) .value{color:#ee8c94}
+          .cipher-display-item:nth-child(10n+9){border-left-color:#67bfa1}.cipher-display-item:nth-child(10n+9) .value{color:#8ed7b8}
+          .cipher-display-item:nth-child(10n){border-left-color:#c7d1d7}.cipher-display-item:nth-child(10n) .value{color:#e1eaee}
+          """
+          s = s.replace("</style>", palette + "\n</style>", 1)
+          js = s.split("<script>", 1)[1].split("</script>", 1)[0]
+          Path("/tmp/gematrialab-inline.js").write_text(js)
+          p.write_text(s)
+          PY
+          node --check /tmp/gematrialab-inline.js
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
