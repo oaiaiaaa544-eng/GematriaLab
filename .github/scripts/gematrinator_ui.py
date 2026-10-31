@@ -39,7 +39,7 @@ post='''\nbreakdownCard=$('breakdown-select').closest('.card');if(breakdownCard)
 marker='init();'
 if marker not in s: raise SystemExit('Could not find init call')
 before,after=s.rsplit(marker,1)
-s=before+marker+'\\n'+post+after
+s=before+marker+'\n'+post+after
 scripts=re.findall(r'<script>(.*?)</script>',s,re.S)
 Path('/tmp/gematrialab-inline.js').write_text('\\n'.join(scripts))
 p.write_text(s)
