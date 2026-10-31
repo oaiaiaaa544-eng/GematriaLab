@@ -50,11 +50,12 @@ jobs:
           from pathlib import Path
           p = Path("GematriaLabAndroid/app/src/main/assets/index.html")
           s = p.read_text()
-          target = "initializeMultiDates(today);"
-          assert target in s
-          s = s.replace(target, target + "multiDates.push({id:nextMultiDateId++,value:today});renderMultiDateInputs();renderMultiDates();", 1)
+          old_init = "function initializeMultiDates(today){multiDates=[{id:nextMultiDateId++,value:today}];renderMultiDateInputs();renderMultiDates();}"
+          new_init = "function initializeMultiDates(today){multiDates=[{id:nextMultiDateId++,value:today},{id:nextMultiDateId++,value:today}];renderMultiDateInputs();renderMultiDates();}"
+          assert old_init in s, "Multi-date initializer was not found"
+          s = s.replace(old_init, new_init, 1)
           palette = """
-          /* Classic Gematrinator-style cipher color rotation */
+          /* Gematrinator-inspired color rotation for selected cipher values */
           .cipher-display-item:nth-child(10n+1){border-left-color:#43cc73}.cipher-display-item:nth-child(10n+1) .value{color:#54dd7e}
           .cipher-display-item:nth-child(10n+2){border-left-color:#648cff}.cipher-display-item:nth-child(10n+2) .value{color:#83a5ff}
           .cipher-display-item:nth-child(10n+3){border-left-color:#d77acb}.cipher-display-item:nth-child(10n+3) .value{color:#e69adb}
@@ -66,7 +67,8 @@ jobs:
           .cipher-display-item:nth-child(10n+9){border-left-color:#67bfa1}.cipher-display-item:nth-child(10n+9) .value{color:#8ed7b8}
           .cipher-display-item:nth-child(10n){border-left-color:#c7d1d7}.cipher-display-item:nth-child(10n) .value{color:#e1eaee}
           """
-          s = s.replace("</style>", palette + "\n</style>", 1)
+          assert "</style>" in s
+          s = s.replace("</style>", palette + "\\n</style>", 1)
           js = s.split("<script>", 1)[1].split("</script>", 1)[0]
           Path("/tmp/gematrialab-inline.js").write_text(js)
           p.write_text(s)
