@@ -76,6 +76,11 @@ jobs:
           python3 .github/scripts/gematrinator_ui.py
           node --check /tmp/gematrialab-inline.js
 
+      - name: Apply Gematrinator date calculator
+        run: |
+          python3 .github/scripts/gematrinator_date_ui.py
+          node --check /tmp/gematrialab-inline.js
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
