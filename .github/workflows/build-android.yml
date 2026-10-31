@@ -11,14 +11,17 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Decode and extract Android project
+      - name: Reassemble, verify and extract project
         run: |
-          base64 --decode GematriaLabAndroid-source.tar.xz.b64 > source.tar.xz
+          cat source-part-*.b64 > source.tar.xz.b64
+          test "$(wc -c < source.tar.xz.b64)" -eq 22348
+          base64 --decode source.tar.xz.b64 > source.tar.xz
+          echo "72bc666af6e59770ac6438b8b2eab5c3cd66b19ebd780a05293ca5dfbf8cdcf7  source.tar.xz" | sha256sum -c -
           tar -xJf source.tar.xz
           test -f GematriaLabAndroid/app/src/main/assets/index.html
 
@@ -46,7 +49,9 @@ jobs:
         run: gradle --no-daemon --stacktrace clean assembleDebug
 
       - name: Verify APK
-        run: test -s GematriaLabAndroid/app/build/outputs/apk/debug/app-debug.apk
+        run: |
+          test -s GematriaLabAndroid/app/build/outputs/apk/debug/app-debug.apk
+          ls -lh GematriaLabAndroid/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
