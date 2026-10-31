@@ -93,5 +93,7 @@ js = r'''
 })();
 '''
 s=s.replace("</script>",js+"\n</script>",1)
+js=s.split("<script>",1)[1].split("</script>",1)[0]
+Path("/tmp/gematrialab-inline.js").write_text(js)
 p.write_text(s)
 print("Gematrinator-style date calculator added")
