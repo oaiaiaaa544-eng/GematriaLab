@@ -25,6 +25,12 @@ jobs:
           tar -xJf source.tar.xz
           test -f GematriaLabAndroid/app/src/main/assets/index.html
 
+      - name: Apply UI and date calculator updates
+        run: |
+          base64 --decode .github/scripts/patch_app.py.gz.b64 | gzip -dc > /tmp/patch_app.py
+          python /tmp/patch_app.py GematriaLabAndroid
+          test -f GematriaLabAndroid/app/src/main/assets/index.html
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
